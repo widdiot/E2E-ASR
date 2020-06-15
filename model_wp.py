@@ -35,26 +35,26 @@ class RNNModel(nn.Module):
         return ctc_beam(logp.data.cpu().numpy(), W)        
 
 class Transducer(nn.Module):
-    def __init__(self, input_size, vocab_size, hidden_size, num_layers, dropout=.5, blank=0, bidirectional=False):
+    def __init__(self, input_size, vocab_size, enc_hidden_size, enc_num_layers, dec_units, dec_layers, dropout=.5, blank=0, bidirectional=False):
         super(Transducer, self).__init__()
         self.blank = blank
         self.vocab_size = vocab_size
-        self.hidden_size = hidden_size
-        self.num_layers = num_layers
+        self.enc_hidden_size = enc_hidden_size
+        self.enc_num_layers = enc_num_layers
         self.loss = RNNTLoss()
         # NOTE encoder & decoder only use lstm
-        self.encoder = RNNModel(input_size, hidden_size, hidden_size, num_layers, dropout, bidirectional=bidirectional)
-        self.embed = nn.Embedding(vocab_size, vocab_size-1, padding_idx=blank)
+        self.encoder = RNNModel(input_size, enc_hidden_size, enc_hidden_size, enc_num_layers, dropout, bidirectional=bidirectional)
+#        self.embed = nn.Embedding(vocab_size, vocab_size-1, padding_idx=blank)
 #        self.embed.weight.data[1:] = torch.eye(vocab_size-1)
-#        self.embed = nn.Embedding(vocab_size, 512, padding_idx=blank)
+        self.embed = nn.Embedding(vocab_size, 512, padding_idx=blank)
 #        self.embed.weight.data[1:] = torch.eye(256)
 
-        self.embed.weight.requires_grad = False
+#        self.embed.weight.requires_grad = False
        # self.decoder = RNNModel(vocab_size-1, vocab_size, hidden_size, 1, dropout)
-        self.decoder = nn.LSTM(vocab_size-1, hidden_size, 2, batch_first=True, dropout=dropout)
-#        self.decoder = nn.LSTM(512, hidden_size, 1, batch_first=True, dropout=dropout)
-        self.fc1 = nn.Linear(2*hidden_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, vocab_size)
+#        self.decoder = nn.LSTM(vocab_size-1, hidden_size, 1, batch_first=True, dropout=dropout)
+        self.decoder = nn.LSTM(512, dec_units, dec_layers, batch_first=True, dropout=dropout)
+        self.fc1 = nn.Linear(dec_units+enc_hidden_size, enc_hidden_size)
+        self.fc2 = nn.Linear(enc_hidden_size, vocab_size)
         self._nparams_dict = {}
         self._nparams = 0
 
@@ -136,6 +136,36 @@ class Transducer(nn.Module):
             logps.append(logp)
         return y_seqs, logps
 
+    def get_log_probs(self, x):
+        #x = self.encoder(x)[0][0]
+        x = self.encoder(x)[0]
+        vy = autograd.Variable(torch.LongTensor([0]), volatile=True).view(1, 1)  # vector preserve for embedding
+        if x.is_cuda: vy = vy.cuda()
+        y, h = self.decoder(self.embed(vy))  # decode first zero
+        bs = x.size(0)
+        logps = []
+        #y_seqs = []
+        for b in range(bs):
+            #y_seq = []
+            logp = []
+            vy = autograd.Variable(torch.LongTensor([0]), volatile=True).view(1, 1)  # vector preserve for embedding
+            if x.is_cuda:
+                vy = vy.cuda()
+            y, h = self.decoder(self.embed(vy))  # decode first zero
+            for i in x[b]:
+                ytu = self.joint(i, y[0][0])
+                out = F.log_softmax(ytu, dim=0)
+                p, pred = torch.max(out, dim=0)  # suppose blank = -1
+                pred = int(pred)
+                logp.append(out.cpu().data.numpy())
+                if pred != self.blank:
+                    #y_seq.append(pred)
+                    vy.data[0][0] = pred  # change pm state
+                    y, h = self.decoder(self.embed(vy), h)
+            #y_seqs.append(y_seq)
+            logp = np.asarray(logp)
+            logps.append(logp)
+        return logps
 
 #    def greedy_decode(self, x):
 #        x = self.encoder(x)[0][0]
@@ -260,3 +290,4 @@ class Sequence():
 
 #    def __str__(self):
 #        return 'Prediction: {}\nlog-likelihood {:.2f}\n'.format(' '.join([rephone[i] for i in self.k]), -self.logp)
+
