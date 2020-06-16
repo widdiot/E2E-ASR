@@ -1,34 +1,36 @@
 # INSTALL
+```
 inside E2E-ASR
 git clone https://github.com/HawkAaron/warp-transducer
 cd warp-transducer
 mkdir build; cd build
 cmake -D WITH_GPU=ON ..
 make -j <nproc>
+```
 
-inside warp_transducer
-set:
-export CUDA_HOME=/usr/local/cuda/ 
-export CUDA_TOOLKIT_ROOT_DIR=$CUDA_HOME
-export LD_LIBRARY_PATH="$CUDA_HOME/extras/CUPTI/lib64:$LD_LIBRARY_PATH"
-export LIBRARY_PATH=$CUDA_HOME/lib64:$LIBRARY_PATH
-export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
-export CFLAGS="-I$CUDA_HOME/include $CFLAGS"
-export WARP_RNNT_PATH=/home/E2E-ASR/warp-transducer/build  ##change to your path
+## inside warp_transducer
+## set:
+* export CUDA_HOME=/usr/local/cuda/ 
+* export CUDA_TOOLKIT_ROOT_DIR=$CUDA_HOME
+* export LD_LIBRARY_PATH="$CUDA_HOME/extras/CUPTI/lib64:$LD_LIBRARY_PATH"
+* export LIBRARY_PATH=$CUDA_HOME/lib64:$LIBRARY_PATH
+* export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
+* export CFLAGS="-I$CUDA_HOME/include $CFLAGS"
+* export WARP_RNNT_PATH=/home/E2E-ASR/warp-transducer/build  ##change to your path
 
-then run 
-cd pytorch_binding
-python setup.py install
+## then run 
+* cd pytorch_binding
+* python setup.py install
 
-then execute
-warp-transducer/pytorch_binding/test/test.py
+## then execute
+* warp-transducer/pytorch_binding/test/test.py
 
-you should get:
-CPU Tests passed!
-GPU Tests passed!
+## you should get:
+**CPU Tests passed! 
+GPU Tests passed!** 
 
-check if import works: 
-from warprnnt_pytorch import RNNTLoss
+# check if import works: 
+*from warprnnt_pytorch import RNNTLoss
 
 # Graves 2013 experiments
 ## File description
