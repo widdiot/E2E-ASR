@@ -10,6 +10,7 @@ make -j <nproc>
 
 ## inside warp_transducer
 ## set:
+```
 * export CUDA_HOME=/usr/local/cuda/ 
 * export CUDA_TOOLKIT_ROOT_DIR=$CUDA_HOME
 * export LD_LIBRARY_PATH="$CUDA_HOME/extras/CUPTI/lib64:$LD_LIBRARY_PATH"
@@ -17,7 +18,7 @@ make -j <nproc>
 * export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
 * export CFLAGS="-I$CUDA_HOME/include $CFLAGS"
 * export WARP_RNNT_PATH=/home/E2E-ASR/warp-transducer/build  ##change to your path
-
+```
 ## then run 
 * cd pytorch_binding
 * python setup.py install
