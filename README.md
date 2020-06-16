@@ -27,12 +27,14 @@ export WARP_RNNT_PATH=/home/E2E-ASR/warp-transducer/build  ##change to your path
 * warp-transducer/pytorch_binding/test/test.py
 
 ## you should get:
-**CPU Tests passed! 
-GPU Tests passed!** 
-
+```
+CPU Tests passed! 
+GPU Tests passed!
+```
 # check if import works: 
-*from warprnnt_pytorch import RNNTLoss
-
+```
+from warprnnt_pytorch import RNNTLoss
+```
 # Graves 2013 experiments
 ## File description
 * model.py: rnnt joint model
