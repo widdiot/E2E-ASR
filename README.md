@@ -35,6 +35,12 @@ GPU Tests passed!
 ```
 from warprnnt_pytorch import RNNTLoss
 ```
+# update
+* model_wp1.py
+* train_inter_check1.py
+* asr1.py
+these files contain code for multi-gpu training and batch resume.
+
 # Graves 2013 experiments
 ## File description
 * model.py: rnnt joint model
